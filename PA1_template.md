@@ -23,7 +23,7 @@ library(tidyverse)
 ```
 
 ```
-## -- Attaching packages --------------------------------------------------- tidyverse 1.2.1 --
+## -- Attaching packages --------------------------------------------------------------- tidyverse 1.2.1 --
 ```
 
 ```
@@ -34,7 +34,7 @@ library(tidyverse)
 ```
 
 ```
-## -- Conflicts ------------------------------------------------------ tidyverse_conflicts() --
+## -- Conflicts ------------------------------------------------------------------ tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()
 ```
@@ -68,29 +68,6 @@ head(activity)
 ## 6    NA 2012-10-01       25
 ```
 
-```r
-str(activity)
-```
-
-```
-## Classes 'tbl_df', 'tbl' and 'data.frame':	17568 obs. of  3 variables:
-##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
-##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
-##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
-##  - attr(*, "spec")=List of 2
-##   ..$ cols   :List of 3
-##   .. ..$ steps   : list()
-##   .. .. ..- attr(*, "class")= chr  "collector_integer" "collector"
-##   .. ..$ date    :List of 1
-##   .. .. ..$ format: chr ""
-##   .. .. ..- attr(*, "class")= chr  "collector_date" "collector"
-##   .. ..$ interval: list()
-##   .. .. ..- attr(*, "class")= chr  "collector_integer" "collector"
-##   ..$ default: list()
-##   .. ..- attr(*, "class")= chr  "collector_guess" "collector"
-##   ..- attr(*, "class")= chr "col_spec"
-```
-
 Our data variable is in a `string` format. We have to convert it form `string` to `Date` format. We also need to remove all the `NA` onservations from the data because we will not need them for the computing 
 
 ---
@@ -104,15 +81,6 @@ activity <- mutate(activity, dateT = as.Date(date, "%Y-%m-%d"))
 
 ## -- Deleting the data with the NAs
 noNAactivity <- filter(activity, !is.na(steps))
-str(noNAactivity)
-```
-
-```
-## Classes 'tbl_df', 'tbl' and 'data.frame':	15264 obs. of  4 variables:
-##  $ steps   : int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ date    : Date, format: "2012-10-02" "2012-10-02" ...
-##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
-##  $ dateT   : Date, format: "2012-10-02" "2012-10-02" ...
 ```
 ---
 
@@ -192,26 +160,26 @@ steps_median
 ## have a data with 5 min intervall means of steps
 int5.data <- noNAactivity %>%
   group_by(interval) %>%
-  summarize(meanSteps = mean(steps))
+  summarize(sumSteps = sum(steps))
 
 head(int5.data)
 ```
 
 ```
 ## # A tibble: 6 x 2
-##   interval meanSteps
-##      <int>     <dbl>
-## 1        0    1.72  
-## 2        5    0.340 
-## 3       10    0.132 
-## 4       15    0.151 
-## 5       20    0.0755
-## 6       25    2.09
+##   interval sumSteps
+##      <int>    <int>
+## 1        0       91
+## 2        5       18
+## 3       10        7
+## 4       15        8
+## 5       20        4
+## 6       25      111
 ```
 
 ```r
 qplot(x = int5.data$interval,
-      y = int5.data$meanSteps,
+      y = int5.data$sumSteps,
       geom = "line",
       xlab = "5-minute Intervals",
       ylab = "Average Steps Taken by days",
@@ -226,33 +194,14 @@ qplot(x = int5.data$interval,
 
 
 ```r
-summary(noNAactivity)
+filter(int5.data, sumSteps==max(sumSteps))
 ```
 
 ```
-##      steps             date               interval     
-##  Min.   :  0.00   Min.   :2012-10-02   Min.   :   0.0  
-##  1st Qu.:  0.00   1st Qu.:2012-10-16   1st Qu.: 588.8  
-##  Median :  0.00   Median :2012-10-29   Median :1177.5  
-##  Mean   : 37.38   Mean   :2012-10-30   Mean   :1177.5  
-##  3rd Qu.: 12.00   3rd Qu.:2012-11-16   3rd Qu.:1766.2  
-##  Max.   :806.00   Max.   :2012-11-29   Max.   :2355.0  
-##      dateT           
-##  Min.   :2012-10-02  
-##  1st Qu.:2012-10-16  
-##  Median :2012-10-29  
-##  Mean   :2012-10-30  
-##  3rd Qu.:2012-11-16  
-##  Max.   :2012-11-29
-```
-
-```r
-maxSteps <- noNAactivity$interval[which.max(noNAactivity$steps)]
-maxSteps
-```
-
-```
-## [1] 615
+## # A tibble: 1 x 2
+##   interval sumSteps
+##      <int>    <int>
+## 1      835    10927
 ```
 
 ## Imputing missing values
@@ -271,7 +220,7 @@ sum(is.na(activity$steps))
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-`The strategy is to replace missing values by the mean of that day and replace the remain missin values by the mean of the 5 min interval`
+`The strategy is to replace missing values by the mean of that day and replace the remain missing values by the mean of the 5 min interval`
 
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
@@ -356,7 +305,7 @@ These values are different from the first computed values as NAs values was fill
 ---
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+## Are there differences in #activity patterns between weekdays and weekends?
 
 1. Create a new factor variable in the dataset with two levels - `weekday` and `weekend` indicating whether a given date is a weekday or weekend day.
 
@@ -389,7 +338,7 @@ head(activity.fill)
 
 ```r
 int5.data2 <- activity.fill %>%
-  group_by(interval) %>%
+  group_by_(.dots = c("interval", "weekDayType")) %>%
   mutate(meanSteps = mean(steps))
 
 head(int5.data2)
@@ -397,19 +346,21 @@ head(int5.data2)
 
 ```
 ## # A tibble: 6 x 7
-## # Groups:   interval [6]
+## # Groups:   interval, weekDayType [6]
 ##    steps date       interval dateT      weekDay weekDayType meanSteps
 ##    <dbl> <date>        <int> <date>       <int> <fct>           <dbl>
-## 1 1.72   2012-10-01        0 2012-10-01       1 weekday        1.72  
-## 2 0.340  2012-10-01        5 2012-10-01       1 weekday        0.340 
-## 3 0.132  2012-10-01       10 2012-10-01       1 weekday        0.132 
-## 4 0.151  2012-10-01       15 2012-10-01       1 weekday        0.151 
-## 5 0.0755 2012-10-01       20 2012-10-01       1 weekday        0.0755
-## 6 2.09   2012-10-01       25 2012-10-01       1 weekday        2.09
+## 1 1.72   2012-10-01        0 2012-10-01       1 weekday        2.25  
+## 2 0.340  2012-10-01        5 2012-10-01       1 weekday        0.445 
+## 3 0.132  2012-10-01       10 2012-10-01       1 weekday        0.173 
+## 4 0.151  2012-10-01       15 2012-10-01       1 weekday        0.198 
+## 5 0.0755 2012-10-01       20 2012-10-01       1 weekday        0.0990
+## 6 2.09   2012-10-01       25 2012-10-01       1 weekday        1.59
 ```
 
 ```r
-ggplot(data = int5.data2, aes(interval, meanSteps)) + geom_line() + facet_grid(int5.data2$weekDayType ~ .) 
+ggplot(data = int5.data2, aes(interval, meanSteps)) + 
+  geom_line(color="blue") + 
+  facet_grid(int5.data2$weekDayType ~ .) 
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->

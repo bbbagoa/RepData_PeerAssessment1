@@ -3,6 +3,7 @@ title: 'Reproducible Research: Peer Assessment 1'
 author: "Brice Baem BAGOA"
 date: "July 11, 2018"
 output:
+  pdf_document: default
   html_document:
     keep_md: yes
   word_document: default
@@ -24,7 +25,6 @@ knitr::opts_knit$set(root.dir = "D:\\Learning\\Data Science Specialization\\Repr
 library(tidyverse)
 activity <- read_csv("activity.csv")
 head(activity)
-str(activity)
 ```
 
 Our data variable is in a `string` format. We have to convert it form `string` to `Date` format. We also need to remove all the `NA` onservations from the data because we will not need them for the computing 
@@ -39,7 +39,6 @@ activity <- mutate(activity, dateT = as.Date(date, "%Y-%m-%d"))
 
 ## -- Deleting the data with the NAs
 noNAactivity <- filter(activity, !is.na(steps))
-str(noNAactivity)
 ```
 ---
 
@@ -86,12 +85,12 @@ steps_median
 ## have a data with 5 min intervall means of steps
 int5.data <- noNAactivity %>%
   group_by(interval) %>%
-  summarize(meanSteps = mean(steps))
+  summarize(sumSteps = sum(steps))
 
 head(int5.data)
 
 qplot(x = int5.data$interval,
-      y = int5.data$meanSteps,
+      y = int5.data$sumSteps,
       geom = "line",
       xlab = "5-minute Intervals",
       ylab = "Average Steps Taken by days",
@@ -103,9 +102,7 @@ qplot(x = int5.data$interval,
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```{r}
-summary(noNAactivity)
-maxSteps <- noNAactivity$interval[which.max(noNAactivity$steps)]
-maxSteps
+filter(int5.data, sumSteps==max(sumSteps))
 ```
 
 ## Imputing missing values
@@ -119,7 +116,7 @@ sum(is.na(activity$steps))
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
-`The strategy is to replace missing values by the mean of that day and replace the remain missin values by the mean of the 5 min interval`
+`The strategy is to replace missing values by the mean of that day and replace the remain missing values by the mean of the 5 min interval`
 
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
@@ -173,7 +170,7 @@ These values are different from the first computed values as NAs values was fill
 ---
 
 
-## Are there differences in activity patterns between weekdays and weekends?
+## Are there differences in #activity patterns between weekdays and weekends?
 
 1. Create a new factor variable in the dataset with two levels - `weekday` and `weekend` indicating whether a given date is a weekday or weekend day.
 
@@ -191,10 +188,12 @@ head(activity.fill)
 
 ```{r}
 int5.data2 <- activity.fill %>%
-  group_by(interval) %>%
+  group_by_(.dots = c("interval", "weekDayType")) %>%
   mutate(meanSteps = mean(steps))
 
 head(int5.data2)
 
-ggplot(data = int5.data2, aes(interval, meanSteps)) + geom_line() + facet_grid(int5.data2$weekDayType ~ .) 
+ggplot(data = int5.data2, aes(interval, meanSteps)) + 
+  geom_line(color="blue") + 
+  facet_grid(int5.data2$weekDayType ~ .) 
 ```
